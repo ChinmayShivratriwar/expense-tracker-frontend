@@ -4,13 +4,15 @@ import { loginUser } from "../features/auth/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ emailOrUsername: "", password: "" });
   const { loading, error } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,6 +20,13 @@ export default function LoginPage() {
       .unwrap()
       .then(() => navigate("/"))
       .catch(() => {});
+  };
+
+  const renderError = () => {
+    if (!error) return null;
+    if (typeof error === "string") return error;
+    if (error.message) return error.message;
+    return JSON.stringify(error);
   };
 
   return (
@@ -32,15 +41,16 @@ export default function LoginPage() {
 
         {error && (
           <p className="text-red-500 font-semibold mb-4 text-center bg-red-900/40 p-2 rounded">
-            {error}
+            {renderError()}
           </p>
         )}
 
         <input
-          type="email"
-          name="email"
-          placeholder="Email"
+          type="text"
+          name="emailOrUsername"
+          placeholder="Email or Username"
           onChange={handleChange}
+          value={formData.emailOrUsername}
           className="w-full mb-3 p-3 rounded bg-black border border-yellow-500/40 text-yellow-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
           required
         />
@@ -48,6 +58,7 @@ export default function LoginPage() {
           type="password"
           name="password"
           placeholder="Password"
+          value={formData.password}
           onChange={handleChange}
           className="w-full mb-4 p-3 rounded bg-black border border-yellow-500/40 text-yellow-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
           required

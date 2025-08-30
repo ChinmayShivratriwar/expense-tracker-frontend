@@ -1,7 +1,25 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const API_URL = "http://localhost:8080/api/auth"; // adjust to your backend
+
+const token = localStorage.getItem("token");
+let user = null;
+
+if (token) {
+  try {
+    const decoded = jwtDecode(token);
+    user = {
+      id: decoded.id,
+      name: decoded.name,
+      email: decoded.email,
+    };
+  } catch (err) {
+    console.warn("Invalid token in localStorage");
+    localStorage.removeItem("token");
+  }
+}
 
 // Async thunks
 export const registerUser = createAsyncThunk(
@@ -19,12 +37,22 @@ export const registerUser = createAsyncThunk(
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
-    try {
+    try {      
       const res = await axios.post(`${API_URL}/login`, credentials);
+      console.log("The credentials")
+      console.log(res.data);
       localStorage.setItem("token", res.data.token); // store token
-      return res.data;
+      localStorage.setItem("refreshToken", res.data.refreshToken)
+      const decoded = jwtDecode(res.data.accessToken);
+      const user = {
+        id: decoded.id,
+        name: decoded.name,
+        email: decoded.email,
+      };
+
+      return { user, token: res.data.accessToken };
     } catch (err) {
-      return rejectWithValue(err.response.data || "Login failed");
+      return rejectWithValue(err.response?.data?.message || "Login failed");
     }
   }
 );
