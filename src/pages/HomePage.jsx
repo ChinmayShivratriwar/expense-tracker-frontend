@@ -1,55 +1,3 @@
-// import { useDispatch, useSelector } from "react-redux";
-// import { logout } from "../features/auth/authSlice";
-// import { useNavigate } from "react-router-dom";
-// import { motion } from "framer-motion";
-// import batmanLogo from "../assets/batman-9.svg"
-
-// export default function HomePage() {
-//   const { user } = useSelector((state) => state.auth);
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-
-//   const handleLogout = () => {
-//     dispatch(logout());
-//     navigate("/login");
-//   };
-
-
-//   return (
-//     <div className="flex flex-col items-center justify-center h-screen bg-bat-black text-bat-white relative overflow-hidden">
-//       {/* Rotating 3D Batman Logo */}
-//       <motion.img
-//         src={batmanLogo}
-//         alt="Batman Logo"
-//         className="w-48 h-48 drop-shadow-[0_0_25px_rgba(250,204,21,0.6)]"
-//         animate={{ rotateY: 360 }}
-//         transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-//       />
-
-//       {/* Welcome Card */}
-//       <div className="bg-yellow-500 text-black font-bold p-4 rounded-xl shadow-lg shadow-yellow-500/40 mb-6 text-center w-full max-w-2xl">
-//         🦇 Welcome to Gotham's Expense Tracker
-//       </div>
-//       <div className="mt-10 p-6 bg-bat-gray shadow-bat-glow rounded-xl w-96 text-center">
-//         <h1 className="text-2xl font-bold mb-4">
-//           Welcome, {user?.name || "User"} 👋
-//         </h1>
-//         <p className="mb-6">You are logged in to the Batcomputer.</p>
-//         <button
-//           onClick={handleLogout}
-//           className="w-full bg-bat-red text-white py-2 rounded shadow-red-glow hover:bg-red-700 transition"
-//         >
-//           Logout
-//         </button>
-//       </div>
-
-//       {/* Subtle background grid effect */}
-//       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
-//     </div>
-//   );
-// }
-
-
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
@@ -83,7 +31,7 @@ export default function HomePage() {
 
       {/* Welcome text */}
       <h1 className="text-3xl font-bold mb-2">
-        Welcome, {user?.name || "Dark Knight"}
+        Welcome, {user?.username || "Dark Knight"}
       </h1>
       <p className="mb-12 text-yellow-400">
         Gotham’s Watchful Protector of Finances

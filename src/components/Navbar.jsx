@@ -45,7 +45,7 @@ export default function Navbar() {
               </React.Fragment>
             ) : (
               <React.Fragment>
-                <span className="text-gray-300">Hi, {user?.name}</span>
+                <span className="text-gray-300">Hi, {user?.username}</span>
                 <button
                   onClick={handleLogout}
                   className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-500 transition shadow-md shadow-red-600/30"
