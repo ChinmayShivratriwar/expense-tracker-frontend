@@ -13,6 +13,14 @@ export default function HomePage() {
     navigate("/login");
   };
 
+  const handleAddExpense = () => {
+    navigate("/add-expense"); // ← navigate to new page
+  };
+
+  const handleExpense = () => {
+    navigate("/expense"); // ← navigate to new page
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-black to-gray-900 text-white relative overflow-hidden">
       {/* Rotating hologram logo */}
@@ -39,11 +47,15 @@ export default function HomePage() {
 
       {/* Batcomputer style dashboard cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl px-6">
-        <div className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition">
+        <div className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition"
+         onClick={handleExpense}
+        >
           <h2 className="text-xl font-bold text-yellow-400 mb-2">💰 Expenses</h2>
           <p>View and track your daily expenses like a true detective.</p>
         </div>
-        <div className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition">
+        <div className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition"
+          onClick={handleAddExpense}
+        >
           <h2 className="text-xl font-bold text-yellow-400 mb-2">➕ Add Expense</h2>
           <p>Log a new expense directly into Gotham’s Batcomputer.</p>
         </div>
