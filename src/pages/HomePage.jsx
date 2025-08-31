@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../features/auth/authSlice";
+import { logout, logoutUser } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import batmanLogo from "../assets/batman-9.svg"
 
@@ -9,7 +9,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
     navigate("/login");
   };
 

@@ -84,7 +84,15 @@ export const logoutUser = createAsyncThunk(
     const { refreshToken } = getState().auth;
     try {
       if (refreshToken) {
-        await axios.post(`${API_URL}/logout`, { refreshToken });
+        await axios.post(
+          `${API_URL}/logout`,
+          {}, // empty body
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`, // attach refresh token in header
+            },
+          }
+        );
       }
     } catch (err) {
       console.error("Logout API failed", err.response?.data || err.message);
