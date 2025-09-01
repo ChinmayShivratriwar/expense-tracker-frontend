@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import AddExpense from "./pages/AddExpense";
 import Expense from "./pages/ExpensePage";
+import Budget from "./pages/Budget"
 
 function App() {
   return (
@@ -44,6 +45,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Expense />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/budget"
+            element={
+              <ProtectedRoute>
+                <Budget />
               </ProtectedRoute>
             }
           />

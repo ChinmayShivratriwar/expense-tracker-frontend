@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import axiosInstance from "../features/axiosInstance";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import {
   BarChart,
@@ -21,35 +21,27 @@ import {
   PolarRadiusAxis,
 } from "recharts";
 import batmanLogo from "../assets/batman-9.svg";
+import { fetchTransactions } from "../features/transaction/transactionSlice";
+import Pagination from "./Pagination";
 
 export default function ExpensesPage() {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const dispatch = useDispatch();
+
+  const { transactions = [], loading, error, page, totalPages } = useSelector(
+    (state) => state.transactions || {}
+  );
 
   const ITEMS_PER_PAGE = 8;
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const res = await axiosInstance.get("/transactions");
-        setTransactions(res.data || []);
-      } catch (err) {
-        setError(err.response?.data?.message || "Failed to load transactions");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTransactions();
-  }, []);
+    dispatch(fetchTransactions({ page: 0, size: ITEMS_PER_PAGE }));
+  }, [dispatch]);
 
-  // Pagination helpers
-  const totalPages = Math.ceil(transactions.length / ITEMS_PER_PAGE);
-  const paginatedTransactions = transactions.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      dispatch(fetchTransactions({ page: newPage, size: ITEMS_PER_PAGE }));
+    }
+  };
 
   // Totals by type
   const totals = transactions.reduce(
@@ -70,19 +62,24 @@ export default function ExpensesPage() {
 
   // Line chart: cumulative over time
   const lineData = transactions
-    .sort((a, b) => new Date(a.transactionDate) - new Date(b.transactionDate))
-    .map((txn, idx) => ({
-      date: format(new Date(txn.transactionDate), "yyyy-MM-dd"),
+    .slice()
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    .map((txn, idx, arr) => ({
+      date: format(new Date(txn.createdAt), "yyyy-MM-dd"),
       cumulativeAmount:
-        idx === 0
-          ? txn.amount
-          : txn.amount +
-            transactions
-              .slice(0, idx)
-              .reduce((s, t) => s + t.amount, 0),
+        txn.amount +
+        arr.slice(0, idx).reduce((sum, t) => sum + t.amount, 0),
     }));
 
-  const barColors = ["#FFD700", "#FF8C00", "#FF4500", "#ADFF2F", "#00FFFF", "#1E90FF", "#DA70D6"];
+  const barColors = [
+    "#FFD700",
+    "#FF8C00",
+    "#FF4500",
+    "#ADFF2F",
+    "#00FFFF",
+    "#1E90FF",
+    "#DA70D6",
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-950 text-yellow-400 p-6">
@@ -100,7 +97,9 @@ export default function ExpensesPage() {
 
       {/* List View */}
       <div className="bg-gray-900/80 backdrop-blur-md border border-yellow-500/30 rounded-xl shadow-lg p-4 mb-6">
-        <h2 className="text-xl font-bold mb-4 text-yellow-300">📋 Transaction List</h2>
+        <h2 className="text-xl font-bold mb-4 text-yellow-300">
+          📋 Transaction List
+        </h2>
         {loading ? (
           <p className="text-yellow-400">Loading...</p>
         ) : error ? (
@@ -120,12 +119,14 @@ export default function ExpensesPage() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedTransactions.map((txn) => (
+                {transactions.map((txn) => (
                   <tr
                     key={txn.id}
                     className="border-b border-yellow-500/20 hover:bg-gray-800/50 transition-all"
                   >
-                    <td className="p-2">{format(new Date(txn.transactionDate), "yyyy-MM-dd HH:mm")}</td>
+                    <td className="p-2">
+                      {format(new Date(txn.createdAt), "yyyy-MM-dd HH:mm")}
+                    </td>
                     <td className="p-2">{txn.type}</td>
                     <td className="p-2">{txn.category}</td>
                     <td className="p-2">{txn.amount}</td>
@@ -135,39 +136,13 @@ export default function ExpensesPage() {
               </tbody>
             </table>
 
-            {/* Pagination Controls */}
+            {/* ✅ Ellipsis + Jump Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-4">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => p - 1)}
-                  className={`px-3 py-1 rounded border ${
-                    currentPage === 1 ? "border-yellow-700 text-yellow-700" : "border-yellow-500 text-yellow-400"
-                  }`}
-                >
-                  Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`px-3 py-1 rounded border ${
-                      currentPage === i + 1 ? "bg-yellow-500 text-black" : "border-yellow-500 text-yellow-400"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-                <button
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                  className={`px-3 py-1 rounded border ${
-                    currentPage === totalPages ? "border-yellow-700 text-yellow-700" : "border-yellow-500 text-yellow-400"
-                  }`}
-                >
-                  Next
-                </button>
-              </div>
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             )}
           </div>
         )}
@@ -181,9 +156,15 @@ export default function ExpensesPage() {
             className="p-4 rounded-xl border border-yellow-500/30 shadow-md bg-gray-900/70 hover:scale-105 transform transition"
           >
             <h3 className="text-lg font-bold mb-2 text-yellow-400">
-              {type === "EXPENSE" ? "💸 Expenses" : type === "INCOME" ? "💰 Income" : "🔁 Transfers"}
+              {type === "EXPENSE"
+                ? "💸 Expenses"
+                : type === "INCOME"
+                ? "💰 Income"
+                : "🔁 Transfers"}
             </h3>
-            <p className="text-2xl font-extrabold text-yellow-300">{totals[type] || 0}</p>
+            <p className="text-2xl font-extrabold text-yellow-300">
+              {totals[type] || 0}
+            </p>
           </div>
         ))}
       </div>
@@ -192,15 +173,26 @@ export default function ExpensesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Category Bar */}
         <div className="bg-gray-900/80 backdrop-blur-md border border-yellow-500/30 rounded-xl shadow-lg p-4">
-          <h2 className="text-xl font-bold mb-4 text-yellow-300">📊 Category Totals (Bar)</h2>
+          <h2 className="text-xl font-bold mb-4 text-yellow-300">
+            📊 Category Totals (Bar)
+          </h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={categoryData}>
               <XAxis dataKey="category" stroke="#FFD700" />
               <YAxis stroke="#FFD700" />
-              <Tooltip contentStyle={{ backgroundColor: "#1F2937", border: "none", color: "#FFD700" }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#1F2937",
+                  border: "none",
+                  color: "#FFD700",
+                }}
+              />
               <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
                 {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={barColors[index % barColors.length]}
+                  />
                 ))}
               </Bar>
             </BarChart>
@@ -209,20 +201,36 @@ export default function ExpensesPage() {
 
         {/* Cumulative Line */}
         <div className="bg-gray-900/80 backdrop-blur-md border border-yellow-500/30 rounded-xl shadow-lg p-4">
-          <h2 className="text-xl font-bold mb-4 text-yellow-300">📈 Cumulative Trend (Line)</h2>
+          <h2 className="text-xl font-bold mb-4 text-yellow-300">
+            📈 Cumulative Trend (Line)
+          </h2>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={lineData}>
               <XAxis dataKey="date" stroke="#FFD700" />
               <YAxis stroke="#FFD700" />
-              <Tooltip contentStyle={{ backgroundColor: "#1F2937", border: "none", color: "#FFD700" }} />
-              <Line type="monotone" dataKey="cumulativeAmount" stroke="#FFD700" strokeWidth={3} dot={{ r: 4 }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#1F2937",
+                  border: "none",
+                  color: "#FFD700",
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="cumulativeAmount"
+                stroke="#FFD700"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Category Pie */}
         <div className="bg-gray-900/80 backdrop-blur-md border border-yellow-500/30 rounded-xl shadow-lg p-4">
-          <h2 className="text-xl font-bold mb-4 text-yellow-300">🥧 Category Breakdown (Pie)</h2>
+          <h2 className="text-xl font-bold mb-4 text-yellow-300">
+            🥧 Category Breakdown (Pie)
+          </h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -234,12 +242,19 @@ export default function ExpensesPage() {
                 label={({ name, value }) => `${name}: ${value}`}
               >
                 {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={barColors[index % barColors.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip
                 formatter={(value, name) => [value, name]}
-                contentStyle={{ backgroundColor: "#1F2937", border: "none", color: "#FFD700" }}
+                contentStyle={{
+                  backgroundColor: "#1F2937",
+                  border: "none",
+                  color: "#FFD700",
+                }}
               />
               <Legend verticalAlign="bottom" wrapperStyle={{ color: "#FFD700" }} />
             </PieChart>
@@ -248,7 +263,9 @@ export default function ExpensesPage() {
 
         {/* Type Pie */}
         <div className="bg-gray-900/80 backdrop-blur-md border border-yellow-500/30 rounded-xl shadow-lg p-4">
-          <h2 className="text-xl font-bold mb-4 text-yellow-300">🥧 Type Breakdown (Pie)</h2>
+          <h2 className="text-xl font-bold mb-4 text-yellow-300">
+            🥧 Type Breakdown (Pie)
+          </h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -269,7 +286,11 @@ export default function ExpensesPage() {
               </Pie>
               <Tooltip
                 formatter={(value, name) => [value, name]}
-                contentStyle={{ backgroundColor: "#1F2937", border: "none", color: "#FFD700" }}
+                contentStyle={{
+                  backgroundColor: "#1F2937",
+                  border: "none",
+                  color: "#FFD700",
+                }}
               />
               <Legend verticalAlign="bottom" wrapperStyle={{ color: "#FFD700" }} />
             </PieChart>
@@ -278,7 +299,9 @@ export default function ExpensesPage() {
 
         {/* Radar Chart */}
         <div className="bg-gray-900/80 backdrop-blur-md border border-yellow-500/30 rounded-xl shadow-lg p-4">
-          <h2 className="text-xl font-bold mb-4 text-yellow-300">🕹 Type Comparison (Radar)</h2>
+          <h2 className="text-xl font-bold mb-4 text-yellow-300">
+            🕹 Type Comparison (Radar)
+          </h2>
           <ResponsiveContainer width="100%" height={250}>
             <RadarChart
               data={[
@@ -290,8 +313,19 @@ export default function ExpensesPage() {
               <PolarGrid stroke="#FFD700" />
               <PolarAngleAxis dataKey="type" stroke="#FFD700" />
               <PolarRadiusAxis stroke="#FFD700" />
-              <Radar dataKey="value" stroke="#FFD700" fill="#FFD700" fillOpacity={0.6} />
-              <Tooltip contentStyle={{ backgroundColor: "#1F2937", border: "none", color: "#FFD700" }} />
+              <Radar
+                dataKey="value"
+                stroke="#FFD700"
+                fill="#FFD700"
+                fillOpacity={0.6}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#1F2937",
+                  border: "none",
+                  color: "#FFD700",
+                }}
+              />
             </RadarChart>
           </ResponsiveContainer>
         </div>

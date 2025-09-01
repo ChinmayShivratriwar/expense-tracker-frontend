@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
-import { logout, logoutUser } from "../features/auth/authSlice";
+import { logoutUser } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
-import batmanLogo from "../assets/batman-9.svg"
+import batmanLogo from "../assets/batman-9.svg";
 
 export default function HomePage() {
   const { user } = useSelector((state) => state.auth);
@@ -13,29 +13,26 @@ export default function HomePage() {
     navigate("/login");
   };
 
-  const handleAddExpense = () => {
-    navigate("/add-expense"); // ← navigate to new page
-  };
-
-  const handleExpense = () => {
-    navigate("/expense"); // ← navigate to new page
-  };
+  const handleAddExpense = () => navigate("/add-expense");
+  const handleExpense = () => navigate("/expense");
+  const handleAnalytics = () => navigate("/analytics");
+  const handleAdmin = () => navigate("/admin");
+  const handleBudgets = () => navigate("/budget");
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-black to-gray-900 text-white relative overflow-hidden">
       {/* Rotating hologram logo */}
       <div className="relative w-48 h-48 mb-12 animate-spin-slow">
-            {/* Glow background */}
-            <div className="absolute inset-0 rounded-full bg-yellow-500 blur-3xl opacity-30 animate-pulse"></div>
+        {/* Glow background */}
+        <div className="absolute inset-0 rounded-full bg-yellow-500 blur-3xl opacity-30 animate-pulse"></div>
 
-                {/* Logo */}
-                <img
-                    src={batmanLogo}
-                    alt="Batman Logo"
-                    className="relative w-full h-full opacity-90 drop-shadow-[0_0_35px_rgba(255,255,0,0.8)]"
-                />
+        {/* Logo */}
+        <img
+          src={batmanLogo}
+          alt="Batman Logo"
+          className="relative w-full h-full opacity-90 drop-shadow-[0_0_35px_rgba(255,255,0,0.8)]"
+        />
       </div>
-      
 
       {/* Welcome text */}
       <h1 className="text-3xl font-bold mb-2">
@@ -46,22 +43,56 @@ export default function HomePage() {
       </p>
 
       {/* Batcomputer style dashboard cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl px-6">
-        <div className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition"
-         onClick={handleExpense}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl px-6">
+        {/* Expenses */}
+        <div
+          className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition cursor-pointer"
+          onClick={handleExpense}
         >
           <h2 className="text-xl font-bold text-yellow-400 mb-2">💰 Expenses</h2>
           <p>View and track your daily expenses like a true detective.</p>
         </div>
-        <div className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition"
+
+        {/* Add Expense */}
+        <div
+          className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-yellow-500/30 hover:scale-105 transition cursor-pointer"
           onClick={handleAddExpense}
         >
           <h2 className="text-xl font-bold text-yellow-400 mb-2">➕ Add Expense</h2>
           <p>Log a new expense directly into Gotham’s Batcomputer.</p>
         </div>
+
+        {/* Budgets */}
         <div
-          onClick={handleLogout}
+          className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-green-500/40 hover:scale-105 transition cursor-pointer"
+          onClick={handleBudgets}
+        >
+          <h2 className="text-xl font-bold text-green-400 mb-2">📊 Budgets</h2>
+          <p>Manage and track financial budgets with precision.</p>
+        </div>
+
+        {/* Analytics */}
+        <div
+          className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-blue-500/40 hover:scale-105 transition cursor-pointer"
+          onClick={handleAnalytics}
+        >
+          <h2 className="text-xl font-bold text-blue-400 mb-2">📈 Analytics</h2>
+          <p>Deep dive into Gotham’s financial insights and trends.</p>
+        </div>
+
+        {/* Admin */}
+        <div
+          className="p-6 bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-purple-500/40 hover:scale-105 transition cursor-pointer"
+          onClick={handleAdmin}
+        >
+          <h2 className="text-xl font-bold text-purple-400 mb-2">🛠️ Admin</h2>
+          <p>Access Batcomputer’s admin-level controls.</p>
+        </div>
+
+        {/* Logout */}
+        <div
           className="p-6 bg-red-700/70 backdrop-blur-md rounded-xl shadow-lg border border-red-500/40 hover:scale-105 transition cursor-pointer"
+          onClick={handleLogout}
         >
           <h2 className="text-xl font-bold text-red-300 mb-2">🚪 Logout</h2>
           <p>Exit securely and return when Gotham needs you.</p>
@@ -70,4 +101,3 @@ export default function HomePage() {
     </div>
   );
 }
-

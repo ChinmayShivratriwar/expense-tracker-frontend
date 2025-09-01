@@ -70,7 +70,7 @@ export default function AddExpensePage() {
         ...formData,
         transactionDate: formData.transactionDate.toISOString(),
       });
-      navigate("/"); // redirect back to homepage
+      navigate("/expense"); // redirect back to homepage
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add transaction");
     } finally {
