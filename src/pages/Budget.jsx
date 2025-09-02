@@ -9,7 +9,7 @@ export default function BudgetDashboard() {
   };
 
   const handleViewBudgets = () => {
-    navigate("/budgets");
+    navigate("/view-budgets");
   };
 
   return (

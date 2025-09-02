@@ -1,19 +1,36 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBudgets } from "../features/budget/budgetSlice";
+import axiosInstance from "../features/axiosInstance"; // make sure this exists
 import batmanLogo from "../assets/batman-9.svg";
 
 export default function Budgets() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { items: budgets, loading, error } = useSelector((state) => state.budgets);
 
-  // Dummy data (replace with Redux or API later)
-  const [budgets, setBudgets] = useState([
-    { id: 1, name: "Housing", amount: 20000, category: "🏠 Housing", description: "Rent + utilities" },
-    { id: 2, name: "Food", amount: 8000, category: "🍔 Food", description: "Groceries and dining out" },
-    { id: 3, name: "Savings", amount: 10000, category: "💎 Savings", description: "Emergency fund + investments" },
-  ]);
+  // Fetch budgets on component mount
+  useEffect(() => {
+    dispatch(fetchBudgets());
+  }, [dispatch]);
 
   const handleAddBudget = () => {
     navigate("/add-budget");
+  };
+
+  // Delete budget function
+  const handleDeleteBudget = async (category, month, year) => {
+    if (!window.confirm(`Are you sure you want to delete the budget for ${category} (${month}/${year})?`)) return;
+
+    try {
+      await axiosInstance.delete(`budgets/${category}/${month}/${year}/remove-budget`);
+      // Refresh budgets
+      dispatch(fetchBudgets());
+    } catch (err) {
+      console.error("Failed to delete budget:", err);
+      alert("Failed to delete budget. Please try again.");
+    }
   };
 
   return (
@@ -40,18 +57,52 @@ export default function Budgets() {
         ➕ Add New Budget
       </button>
 
+      {/* Loading / Error */}
+      {loading && <p className="text-yellow-400 mb-4">Loading budgets...</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
       {/* Budgets Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
         {budgets.map((budget) => (
           <div
             key={budget.id}
-            className="p-6 bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-lg border border-yellow-500/30 hover:scale-105 transition cursor-pointer"
+            className={`p-6 bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-lg border 
+              ${budget.remainingAmount < 0 ? "border-red-500/50" : "border-yellow-500/30"} 
+              hover:scale-105 transition`}
           >
             <h2 className="text-xl font-bold text-yellow-400 mb-2">
-              {budget.category} {budget.name}
+              {budget.category} ({budget.month}/{budget.year})
             </h2>
-            <p className="text-lg mb-1">💵 Amount: <span className="text-green-400">₹{budget.amount}</span></p>
-            <p className="text-sm text-gray-400">{budget.description}</p>
+            <p className="text-lg mb-1">
+              💵 Limit: <span className="text-green-400">₹{budget.limitAmount}</span>
+            </p>
+            <p className="text-lg mb-1">
+              🛒 Spent: <span className="text-red-400">₹{budget.spentAmount}</span>
+            </p>
+            <p className="text-lg mb-1">
+              💰 Remaining: <span className={budget.remainingAmount < 0 ? "text-red-500" : "text-green-400"}>
+                ₹{budget.remainingAmount}
+              </span>
+            </p>
+            <p className="text-lg mb-1">
+              Status: <span className={budget.status === "UNDER_BUDGET" ? "text-green-400" : "text-red-500"}>
+                {budget.status.replace("_", " ")}
+              </span>
+            </p>
+            <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+              <div
+                className={`h-2 rounded-full ${budget.percentageUsed > 100 ? "bg-red-500" : "bg-yellow-400"}`}
+                style={{ width: `${Math.min(budget.percentageUsed, 100)}%` }}
+              />
+            </div>
+
+            {/* Delete Button */}
+            <button
+              onClick={() => handleDeleteBudget(budget.category, budget.month, budget.year)}
+              className="mt-4 w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition"
+            >
+              🗑️ Delete Budget
+            </button>
           </div>
         ))}
       </div>

@@ -7,6 +7,8 @@ import Navbar from "./components/Navbar";
 import AddExpense from "./pages/AddExpense";
 import Expense from "./pages/ExpensePage";
 import Budget from "./pages/Budget"
+import AddBudget from "./pages/AddBudget"
+import ViewBudget from "./pages/ViewBudget"
 
 function App() {
   return (
@@ -54,6 +56,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <Budget />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/add-budget"
+            element={
+              <ProtectedRoute>
+                <AddBudget />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/view-budgets"
+            element={
+              <ProtectedRoute>
+                <ViewBudget />
               </ProtectedRoute>
             }
           />
