@@ -9,11 +9,12 @@ import Expense from "./pages/ExpensePage";
 import Budget from "./pages/Budget"
 import AddBudget from "./pages/AddBudget"
 import ViewBudget from "./pages/ViewBudget"
+import AdminRoute from "./pages/AdminRoute"
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black via-gray-900 to-gray-950 text-gray-200 font-mono">
-      {/* Navbar always visible */}
       <Navbar />
 
       {/* Page content */}
@@ -23,7 +24,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected route for Home */}
+          {/* Protected routes */}
           <Route
             path="/"
             element={
@@ -75,6 +76,15 @@ function App() {
               <ProtectedRoute>
                 <ViewBudget />
               </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
             }
           />
         </Routes>
