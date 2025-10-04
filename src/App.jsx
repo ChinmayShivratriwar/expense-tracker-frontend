@@ -11,6 +11,7 @@ import AddBudget from "./pages/AddBudget"
 import ViewBudget from "./pages/ViewBudget"
 import AdminRoute from "./pages/AdminRoute"
 import AdminDashboard from "./pages/AdminDashboard";
+import Analytics from "./pages/Analytics";
 
 function App() {
   return (
@@ -75,6 +76,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewBudget />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
               </ProtectedRoute>
             }
           />
